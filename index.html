@@ -3,6 +3,21 @@
 <head>
 <title>Hunter System</title>
 <style>
+    .xp-container{
+    width:100%;
+    height:20px;
+    background:#111;
+    border:1px solid #00ffff;
+    margin-top:10px;
+}
+
+#xpBar{
+    height:100%;
+    width:0%;
+    background:linear-gradient(90deg,#00ffff,#00ff9c);
+    box-shadow:0 0 10px #00ffff;
+    transition:width 0.5s ease;
+}
 body {
     background: radial-gradient(circle at center, #050510, black);
     color: #00f7ff;
@@ -30,6 +45,23 @@ h1 {
     text-shadow: 0 0 20px #00f7ff;
 }
 .locked { opacity: 0.4; }
+<div class="panel">
+<h2>Boss Battle</h2>
+
+<p>Boss HP: <span id="bossHP"></span></p>
+
+<button onclick="attackBoss()">Attack Boss</button>
+
+</div>
+<div class="panel">
+<h2>Weekly Raid</h2>
+
+<p>Raid Progress: <span id="raidProgress"></span></p>
+<p>Required: <span id="raidRequired"></span></p>
+
+<button onclick="raidTask()">Complete Raid Task</button>
+
+</div>
 </style>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#000000">
@@ -45,6 +77,9 @@ h1 {
 <h2>Status</h2>
 <p>Rank: <span id="rank">E</span></p>
 <p>Level: <span id="level">1</span></p>
+<div class="xp-container">
+    <div id="xpBar"></div>
+</div>
 <p>XP: <span id="xp">0</span> / <span id="xpNeeded">100</span></p>
 <p>HP: <span id="hp">100</span></p>
 <p>Streak: <span id="streak">0</span></p>
@@ -89,7 +124,33 @@ h1 {
         alert("No actions to undo.");
     }
 }
+let boss = JSON.parse(localStorage.getItem("boss")) || {
+    hp: 200
+};
 
+function updateBoss(){
+    document.getElementById("bossHP").innerText = boss.hp;
+}
+
+function attackBoss(){
+
+    let damage = 20 + system.level * 3;
+    boss.hp -= damage;
+
+    if(boss.hp <= 0){
+        alert("Boss Defeated!");
+
+        system.xp += 200;
+        boss.hp = 200 + system.level * 40;
+
+        save();
+        localStorage.setItem("boss", JSON.stringify(boss));
+    }
+
+    localStorage.setItem("boss", JSON.stringify(boss));
+    updateBoss();
+    updateUI();
+}
 function resetDaily(){
     system.dailyTasks = 0;
     save();
@@ -102,6 +163,25 @@ function fullReset(){
         localStorage.removeItem("hunterSystem");
         location.reload();
     }
+}
+function raidRequirement(){
+    return 10 + system.level;
+}
+
+function raidTask(){
+
+    system.weeklyTasks++;
+
+    if(system.weeklyTasks >= raidRequirement()){
+
+        alert("Weekly Raid Completed!");
+
+        system.xp += 300;
+        system.weeklyTasks = 0;
+    }
+
+    save();
+    updateUI();
 }
 let system = JSON.parse(localStorage.getItem("hunterSystem")) || {
     level: 1,
@@ -229,7 +309,11 @@ updateUI();
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('service-worker.js');
 }
-
+document.getElementById("raidProgress").innerText = system.weeklyTasks;
+document.getElementById("raidRequired").innerText = raidRequirement();
+let xpPercent = (system.xp / system.xpNeeded) * 100;
+document.getElementById("xpBar").style.width = xpPercent + "%";
+updateBoss();
 </script>
 </body>
 </html>
