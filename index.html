@@ -121,6 +121,7 @@ h1 {
 <div class="panel">
 <h2>Daily Quests</h2>
 <button onclick="task('study')">Study 1H</button>
+<p id="timerDisplay">Timer: 30:00</p>
 <button onclick="task('workout')">Workout</button>
 <button onclick="task('deepwork')">Deep Work 2H</button>
 <button onclick="task('social')">Social Skill</button>
@@ -252,7 +253,8 @@ function inactivityPenalty(){
     }
     system.lastActive = now;
 }
-
+let timer;
+let timeLeft = 0;
 function task(type){
     inactivityPenalty();
 
@@ -336,6 +338,40 @@ function unlockSkill(skill){
 <button onclick="resetDaily()">Reset Daily Tasks</button>
 <button onclick="fullReset()">Full System Reset</button>
 </div>
+}
+function startStudy(seconds){
+
+clearInterval(timer);
+
+timeLeft = seconds;
+
+timer = setInterval(function(){
+
+timeLeft--;
+
+let minutes = Math.floor(timeLeft / 60);
+let seconds = timeLeft % 60;
+
+document.getElementById("timerDisplay").innerText =
+"Timer: " + minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
+
+if(timeLeft <= 0){
+
+clearInterval(timer);
+alert("Session Complete! +XP");
+
+}
+
+},1000);
+
+}
+function resetSession(){
+
+clearInterval(timer);
+timeLeft = 0;
+
+document.getElementById("timerDisplay").innerText = "Timer: 00:00";
+
 }
 updateUI();
 
