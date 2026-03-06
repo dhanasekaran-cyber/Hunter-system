@@ -1,22 +1,48 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
 <title>Hunter System</title>
 <style>
-    .xp-container{
+.xp-container{
     width:100%;
-    height:20px;
+    height:18px;
     background:#111;
-    border:1px solid #00ffff;
+    border-radius:10px;
+    overflow:hidden;
     margin-top:10px;
 }
-
 #xpBar{
     height:100%;
     width:0%;
     background:linear-gradient(90deg,#00ffff,#00ff9c);
-    box-shadow:0 0 10px #00ffff;
-    transition:width 0.5s ease;
+    box-shadow:0 0 12px #00ffff;
+    transition:width 0.4s ease;
+}
+.boss-bar{
+    width:100%;
+    height:16px;
+    background:#200000;
+    border-radius:10px;
+    margin-top:8px;
+}
+
+#bossHealth{
+    height:100%;
+    width:100%;
+    background:linear-gradient(90deg,#ff0040,#ff4d4d);
+    box-shadow:0 0 10px red;
+}
+body{
+    background:#05070d;
+    color:#e6f7ff;
+    font-family: 'Orbitron', sans-serif;
+    margin:0;
+    padding:20px;
+}
+h2{
+    color:#00ffff;
+    text-shadow:0 0 10px #00ffff;
 }
 body {
     background: radial-gradient(circle at center, #050510, black);
@@ -24,22 +50,29 @@ body {
     font-family: monospace;
     text-align: center;
 }
-.panel {
-    border: 1px solid #00f7ff;
-    box-shadow: 0 0 15px #00f7ff;
-    margin: 15px;
-    padding: 15px;
+.panel{
+    background:rgba(15,20,40,0.8);
+    border:1px solid #00ffff;
+    border-radius:10px;
+    padding:15px;
+    margin:15px 0;
+    box-shadow:0 0 10px #00ffff, inset 0 0 10px #001f2f;
+    backdrop-filter:blur(6px);
 }
-button {
-    background: black;
-    color: #00f7ff;
-    border: 1px solid #00f7ff;
-    padding: 8px;
-    margin: 5px;
-    cursor: pointer;
+button{
+    background:#001f2f;
+    color:#00ffff;
+    border:1px solid #00ffff;
+    padding:10px 15px;
+    margin-top:10px;
+    border-radius:6px;
+    cursor:pointer;
+    transition:0.3s;
 }
-button:hover {
-    box-shadow: 0 0 10px #00f7ff;
+button:hover{
+    background:#00ffff;
+    color:#000;
+    box-shadow:0 0 12px #00ffff;
 }
 h1 {
     text-shadow: 0 0 20px #00f7ff;
