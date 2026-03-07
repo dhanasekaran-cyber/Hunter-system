@@ -1,272 +1,227 @@
 <!DOCTYPE html>
 <html>
+
 <head>
+    <title>Hunter System</title>
+
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
-<title>Hunter System</title>
-<style>
-.xp-container{
-    width:100%;
-    height:18px;
-    background:#111;
-    border-radius:10px;
-    overflow:hidden;
-    margin-top:10px;
-}
-#xpBar{
-    height:100%;
-    width:0%;
-    background:linear-gradient(90deg,#00ffff,#00ff9c);
-    box-shadow:0 0 12px #00ffff;
-    transition:width 0.4s ease;
-}
-.boss-bar{
-    width:100%;
-    height:16px;
-    background:#200000;
-    border-radius:10px;
-    margin-top:8px;
-}
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon.png">
 
-#bossHealth{
-    height:100%;
-    width:100%;
-    background:linear-gradient(90deg,#ff0040,#ff4d4d);
-    box-shadow:0 0 10px red;
-}
-body{
-    background:#05070d;
-    color:#e6f7ff;
-    font-family: 'Orbitron', sans-serif;
-    margin:0;
-    padding:20px;
-}
-h2{
-    color:#00ffff;
-    text-shadow:0 0 10px #00ffff;
-}
-body {
-    background: radial-gradient(circle at center, #050510, black);
-    color: #00f7ff;
-    font-family: monospace;
-    text-align: center;
-}
-.panel{
-    background:rgba(15,20,40,0.8);
-    border:1px solid #00ffff;
-    border-radius:10px;
-    padding:15px;
-    margin:15px 0;
-    box-shadow:0 0 10px #00ffff, inset 0 0 10px #001f2f;
-    backdrop-filter:blur(6px);
-}
-button{
-    background:#001f2f;
-    color:#00ffff;
-    border:1px solid #00ffff;
-    padding:10px 15px;
-    margin-top:10px;
-    border-radius:6px;
-    cursor:pointer;
-    transition:0.3s;
-}
-button:hover{
-    background:#00ffff;
-    color:#000;
-    box-shadow:0 0 12px #00ffff;
-}
-h1 {
-    text-shadow: 0 0 20px #00f7ff;
-}
-.locked { opacity: 0.4; }
-<div class="panel">
-<h2>Boss Battle</h2>
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-<p>Boss HP: <span id="bossHP"></span></p>
+    <style>
 
-<button onclick="attackBoss()">Attack Boss</button>
+        body {
+            background: radial-gradient(circle at center, #050510, black);
+            color: #00f7ff;
+            font-family: 'Orbitron', monospace;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
 
-</div>
-<div class="panel">
-<h2>Weekly Raid</h2>
+        h1 {
+            text-shadow: 0 0 20px #00f7ff;
+        }
 
-<p>Raid Progress: <span id="raidProgress"></span></p>
-<p>Required: <span id="raidRequired"></span></p>
+        h2 {
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff;
+        }
 
-<button onclick="raidTask()">Complete Raid Task</button>
+        .panel {
+            background: rgba(15,20,40,0.8);
+            border: 1px solid #00ffff;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            box-shadow: 0 0 10px #00ffff, inset 0 0 10px #001f2f;
+            backdrop-filter: blur(6px);
+        }
 
-</div>
-</style>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#000000">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon.png">
+        button {
+            background: #001f2f;
+            color: #00ffff;
+            border: 1px solid #00ffff;
+            padding: 10px 15px;
+            margin-top: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: #00ffff;
+            color: black;
+            box-shadow: 0 0 12px #00ffff;
+        }
+
+        .xp-container {
+            width: 100%;
+            height: 18px;
+            background: #111;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        #xpBar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg,#00ffff,#00ff9c);
+            box-shadow: 0 0 12px #00ffff;
+            transition: width 0.4s ease;
+        }
+
+        .boss-bar {
+            width: 100%;
+            height: 16px;
+            background: #200000;
+            border-radius: 10px;
+            margin-top: 8px;
+        }
+
+        #bossHealth {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg,#ff0040,#ff4d4d);
+            box-shadow: 0 0 10px red;
+        }
+
+        .locked {
+            opacity: 0.4;
+        }
+
+    </style>
 </head>
+
 <body>
 
 <h1>⚔ HUNTER SYSTEM ⚔</h1>
 
+<!-- STATUS -->
 <div class="panel">
-<h2>Status</h2>
-<p>Rank: <span id="rank">E</span></p>
-<p>Level: <span id="level">1</span></p>
-<div class="xp-container">
-    <div id="xpBar"></div>
-</div>
-<p>XP: <span id="xp">0</span> / <span id="xpNeeded">100</span></p>
-<p>HP: <span id="hp">100</span></p>
-<p>Streak: <span id="streak">0</span></p>
+    <h2>Status</h2>
+    <p>Rank: <span id="rank">E</span></p>
+    <p>Level: <span id="level">1</span></p>
+
+    <div class="xp-container">
+        <div id="xpBar"></div>
+    </div>
+
+    <p>XP: <span id="xp">0</span> / <span id="xpNeeded">100</span></p>
+    <p>HP: <span id="hp">100</span></p>
+    <p>Streak: <span id="streak">0</span></p>
 </div>
 
+<!-- DAILY QUESTS -->
 <div class="panel">
-<h2>Daily Quests</h2>
-<button onclick="task('study')">Study 1H</button>
-<p id="timerDisplay">Timer: 30:00</p>
-<button onclick="task('workout')">Workout</button>
-<button onclick="task('deepwork')">Deep Work 2H</button>
-<button onclick="task('social')">Social Skill</button>
+    <h2>Daily Quests</h2>
+
+    <button onclick="task('study')">Study 1H</button>
+    <p id="timerDisplay">Timer: 30:00</p>
+
+    <button onclick="task('workout')">Workout</button>
+    <button onclick="task('deepwork')">Deep Work 2H</button>
+    <button onclick="task('social')">Social Skill</button>
 </div>
 
+<!-- BOSS -->
 <div class="panel">
-<h2>Boss Challenge</h2>
-<button onclick="bossFight()">Attempt Boss (Complete 4 Tasks Today)</button>
-<p id="bossStatus"></p>
+    <h2>Boss Battle</h2>
+    <p>Boss HP: <span id="bossHP"></span></p>
+    <button onclick="attackBoss()">Attack Boss</button>
 </div>
 
+<!-- BOSS CHALLENGE -->
 <div class="panel">
-<h2>Weekly Raid</h2>
-<button onclick="weeklyRaid()">Complete 15 Tasks This Week</button>
-<p id="raidStatus"></p>
+    <h2>Boss Challenge</h2>
+    <button onclick="bossFight()">Attempt Boss (Complete 4 Tasks Today)</button>
+    <p id="bossStatus"></p>
 </div>
 
+<!-- WEEKLY RAID -->
 <div class="panel">
-<h2>Skill Tree</h2>
-<button id="xpBoostBtn" onclick="unlockSkill('xpBoost')">XP Boost (Level 10)</button>
-<button id="streakGuardBtn" onclick="unlockSkill('streakGuard')">Streak Guard (Level 15)</button>
-<p id="skillStatus"></p>
+    <h2>Weekly Raid</h2>
+    <p>Raid Progress: <span id="raidProgress"></span></p>
+    <p>Required: <span id="raidRequired"></span></p>
+
+    <button onclick="raidTask()">Complete Raid Task</button>
+    <button onclick="weeklyRaid()">Complete 15 Tasks This Week</button>
+
+    <p id="raidStatus"></p>
+</div>
+
+<!-- SKILLS -->
+<div class="panel">
+    <h2>Skill Tree</h2>
+    <button id="xpBoostBtn" onclick="unlockSkill('xpBoost')">XP Boost (Level 10)</button>
+    <button id="streakGuardBtn" onclick="unlockSkill('streakGuard')">Streak Guard (Level 15)</button>
+    <p id="skillStatus"></p>
+</div>
+
+<!-- SYSTEM CONTROL -->
+<div class="panel">
+    <h2>System Control</h2>
+    <button onclick="undoLast()">Undo Last Action</button>
+    <button onclick="resetDaily()">Reset Daily Tasks</button>
+    <button onclick="fullReset()">Full System Reset</button>
 </div>
 
 <script>
-    let actionHistory = [];
-    function undoLast(){
-    if(actionHistory.length > 0){
-        system = JSON.parse(actionHistory.pop());
-        save();
-        updateUI();
-        alert("Last action undone.");
-    } else {
-        alert("No actions to undo.");
-    }
-}
-let boss = JSON.parse(localStorage.getItem("boss")) || {
-    hp: 200
-};
 
-function updateBoss(){
-    document.getElementById("bossHP").innerText = boss.hp;
-}
-
-function attackBoss(){
-
-    let damage = 20 + system.level * 3;
-    boss.hp -= damage;
-
-    if(boss.hp <= 0){
-        alert("Boss Defeated!");
-
-        system.xp += 200;
-        boss.hp = 200 + system.level * 40;
-
-        save();
-        localStorage.setItem("boss", JSON.stringify(boss));
-    }
-
-    localStorage.setItem("boss", JSON.stringify(boss));
-    updateBoss();
-    updateUI();
-}
-function resetDaily(){
-    system.dailyTasks = 0;
-    save();
-    updateUI();
-    alert("Daily tasks reset.");
-}
-
-function fullReset(){
-    if(confirm("Are you sure? This will erase all progress.")){
-        localStorage.removeItem("hunterSystem");
-        location.reload();
-    }
-}
-function raidRequirement(){
-    return 10 + system.level;
-}
-
-function raidTask(){
-
-    system.weeklyTasks++;
-
-    if(system.weeklyTasks >= raidRequirement()){
-
-        alert("Weekly Raid Completed!");
-
-        system.xp += 300;
-        system.weeklyTasks = 0;
-    }
-
-    save();
-    updateUI();
-}
 let system = JSON.parse(localStorage.getItem("hunterSystem")) || {
-    level: 1,
-    xp: 0,
-    xpNeeded: 100,
-    hp: 100,
-    rank: "E",
-    streak: 0,
-    dailyTasks: 0,
-    weeklyTasks: 0,
-    skills: { xpBoost:false, streakGuard:false },
-    lastActive: Date.now()
+    level:1,
+    xp:0,
+    xpNeeded:100,
+    hp:100,
+    rank:"E",
+    streak:0,
+    dailyTasks:0,
+    weeklyTasks:0,
+    skills:{xpBoost:false,streakGuard:false},
+    lastActive:Date.now()
 };
 
-function save(){ localStorage.setItem("hunterSystem", JSON.stringify(system)); }
+let boss = JSON.parse(localStorage.getItem("boss")) || { hp:200 };
+
+function save(){
+    localStorage.setItem("hunterSystem",JSON.stringify(system));
+}
 
 function updateUI(){
+
     document.getElementById("level").innerText = system.level;
     document.getElementById("xp").innerText = system.xp;
     document.getElementById("xpNeeded").innerText = system.xpNeeded;
     document.getElementById("hp").innerText = system.hp;
     document.getElementById("rank").innerText = system.rank;
     document.getElementById("streak").innerText = system.streak;
+
+    document.getElementById("raidProgress").innerText = system.weeklyTasks;
+    document.getElementById("raidRequired").innerText = raidRequirement();
+
+    let xpPercent = (system.xp / system.xpNeeded) * 100;
+    document.getElementById("xpBar").style.width = xpPercent + "%";
+
 }
 
-function inactivityPenalty(){
-    let now = Date.now();
-    let diff = (now - system.lastActive) / (1000*60*60);
-    if(diff > 24){
-        if(!system.skills.streakGuard){
-            system.hp -= 20;
-            system.streak = 0;
-            alert("⚠ INACTIVITY PENALTY APPLIED ⚠");
-        }
-    }
-    system.lastActive = now;
+function raidRequirement(){
+    return 10 + system.level;
 }
-let timer;
-let timeLeft = 0;
+
 function task(type){
-    inactivityPenalty();
 
     let xpGain = 40;
-    if(type === "deepwork") xpGain = 60;
-    if(type === "workout") xpGain = 35;
-    if(type === "social") xpGain = 30;
+
+    if(type==="deepwork") xpGain = 60;
+    if(type==="workout") xpGain = 35;
+    if(type==="social") xpGain = 30;
 
     if(system.skills.xpBoost) xpGain *= 1.3;
-
-    // Save previous state for undo
-    actionHistory.push(JSON.stringify(system));
 
     system.xp += xpGain;
     system.dailyTasks++;
@@ -275,114 +230,69 @@ function task(type){
 
     levelUp();
     rankCheck();
+
     save();
     updateUI();
 }
 
 function levelUp(){
+
     while(system.xp >= system.xpNeeded){
+
         system.xp -= system.xpNeeded;
         system.level++;
         system.xpNeeded += 50;
         system.hp += 15;
+
         alert("⚡ LEVEL UP ⚡");
+
     }
 }
 
 function rankCheck(){
-    if(system.level >= 50) system.rank = "S";
-    else if(system.level >= 35) system.rank = "A";
-    else if(system.level >= 20) system.rank = "B";
-    else if(system.level >= 10) system.rank = "C";
-    else if(system.level >= 5) system.rank = "D";
+
+    if(system.level>=50) system.rank="S";
+    else if(system.level>=35) system.rank="A";
+    else if(system.level>=20) system.rank="B";
+    else if(system.level>=10) system.rank="C";
+    else if(system.level>=5) system.rank="D";
+
 }
 
-function bossFight(){
-    if(system.dailyTasks >= 4){
+function attackBoss(){
+
+    let damage = 20 + system.level*3;
+    boss.hp -= damage;
+
+    if(boss.hp<=0){
+
+        alert("Boss Defeated!");
         system.xp += 200;
-        system.hp += 30;
-        document.getElementById("bossStatus").innerText = "🔥 Boss Defeated!";
-        system.dailyTasks = 0;
-    } else {
-        system.hp -= 25;
-        document.getElementById("bossStatus").innerText = "❌ Boss Failed.";
+
+        boss.hp = 200 + system.level*40;
+
     }
-    save(); updateUI();
-}
 
-function weeklyRaid(){
-    if(system.weeklyTasks >= 15){
-        system.xp += 500;
-        document.getElementById("raidStatus").innerText = "🏆 Weekly Raid Cleared!";
-        system.weeklyTasks = 0;
-    } else {
-        system.hp -= 40;
-        document.getElementById("raidStatus").innerText = "❌ Raid Failed.";
-    }
-    save(); updateUI();
-}
-
-function unlockSkill(skill){
-    if(skill === "xpBoost" && system.level >= 10){
-        system.skills.xpBoost = true;
-        document.getElementById("skillStatus").innerText = "XP Boost Unlocked!";
-    }
-    if(skill === "streakGuard" && system.level >= 15){
-        system.skills.streakGuard = true;
-        document.getElementById("skillStatus").innerText = "Streak Guard Unlocked!";
-    }
-    save();
-<div class="panel">
-<h2>System Control</h2>
-<button onclick="undoLast()">Undo Last Action</button>
-<button onclick="resetDaily()">Reset Daily Tasks</button>
-<button onclick="fullReset()">Full System Reset</button>
-</div>
-}
-function startStudy(seconds){
-
-clearInterval(timer);
-
-timeLeft = seconds;
-
-timer = setInterval(function(){
-
-timeLeft--;
-
-let minutes = Math.floor(timeLeft / 60);
-let seconds = timeLeft % 60;
-
-document.getElementById("timerDisplay").innerText =
-"Timer: " + minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
-
-if(timeLeft <= 0){
-
-clearInterval(timer);
-alert("Session Complete! +XP");
+    localStorage.setItem("boss",JSON.stringify(boss));
+    updateBoss();
+    updateUI();
 
 }
 
-},1000);
+function updateBoss(){
+
+    document.getElementById("bossHP").innerText = boss.hp;
 
 }
-function resetSession(){
 
-clearInterval(timer);
-timeLeft = 0;
-
-document.getElementById("timerDisplay").innerText = "Timer: 00:00";
-
-}
 updateUI();
-
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('service-worker.js');
-}
-document.getElementById("raidProgress").innerText = system.weeklyTasks;
-document.getElementById("raidRequired").innerText = raidRequirement();
-let xpPercent = (system.xp / system.xpNeeded) * 100;
-document.getElementById("xpBar").style.width = xpPercent + "%";
 updateBoss();
+
+if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('service-worker.js');
+}
+
 </script>
+
 </body>
 </html>
