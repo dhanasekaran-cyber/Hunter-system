@@ -113,46 +113,6 @@ const TASKS_DEF = [
 ];
 
 // ════════════════════════════════════════════════════════
-//  SKILL POOL — all 4 life areas, AI rotates based on mastery
-// ════════════════════════════════════════════════════════
-const SKILL_POOL = {
-  communication: [
-    { id: "s_eye",      label: "Eye Contact",         desc: "Maintain steady eye contact in every conversation today. No looking away first.", icon: "👁",  xp: 45, area: "communication" },
-    { id: "s_listen",   label: "Active Listening",    desc: "In every conversation today, listen fully before speaking. No interrupting.", icon: "👂", xp: 45, area: "communication" },
-    { id: "s_voice",    label: "Voice Projection",    desc: "Speak louder and clearer than usual. Record yourself for 2 minutes and review.", icon: "🎙", xp: 45, area: "communication" },
-    { id: "s_story",    label: "Storytelling",        desc: "Tell one engaging story today to someone — real event, made compelling.", icon: "📢", xp: 50, area: "communication" },
-    { id: "s_debate",   label: "Argue a Position",    desc: "Pick any topic and argue both sides clearly in writing for 10 minutes.", icon: "⚖",  xp: 50, area: "communication" },
-    { id: "s_cold",     label: "Cold Conversation",   desc: "Start a genuine conversation with someone you've never spoken to before.", icon: "🤝", xp: 55, area: "communication" },
-  ],
-  physical: [
-    { id: "p_cold",     label: "Cold Shower",         desc: "End your shower with 2 full minutes of cold water. No easing in.", icon: "🧊", xp: 50, area: "physical" },
-    { id: "p_stretch",  label: "Mobility Work",       desc: "30 minutes of intentional stretching or yoga. Full range of motion.", icon: "🧘", xp: 40, area: "physical" },
-    { id: "p_posture",  label: "Posture Discipline",  desc: "Maintain perfect posture for the entire day. Set hourly reminders.", icon: "🏛",  xp: 40, area: "physical" },
-    { id: "p_breath",   label: "Breathwork",          desc: "10 minutes of box breathing (4-4-4-4). Track your focus before and after.", icon: "💨", xp: 45, area: "physical" },
-    { id: "p_fast",     label: "Intermittent Fast",   desc: "Skip breakfast. Eat only within a 6-hour window today.", icon: "⚡", xp: 50, area: "physical" },
-    { id: "p_sleep",    label: "Sleep Discipline",    desc: "In bed by 10 PM, no phone 1 hour before. Track your sleep quality.", icon: "🌙", xp: 45, area: "physical" },
-  ],
-  mental: [
-    { id: "m_nophone",  label: "No Phone 2H",         desc: "Zero phone usage for 2 consecutive hours. No cheating, no glances.", icon: "📵", xp: 55, area: "mental" },
-    { id: "m_journal",  label: "Reflection Journal",  desc: "Write 1 page about what you're avoiding and why. Be brutally honest.", icon: "📓", xp: 45, area: "mental" },
-    { id: "m_meditate", label: "Meditation",          desc: "20 minutes of silent meditation. When you lose focus, return without judgment.", icon: "🧠", xp: 45, area: "mental" },
-    { id: "m_hard",     label: "Do The Hard Thing",   desc: "Identify the ONE task you've been avoiding most. Do it today. No excuses.", icon: "🔥", xp: 60, area: "mental" },
-    { id: "m_gratitude",label: "Gratitude Practice",  desc: "Write 10 specific things you're grateful for. Not generic — be precise.", icon: "🙏", xp: 40, area: "mental" },
-    { id: "m_plan",     label: "Week Planning",       desc: "Write out your full week with time blocks. Review what worked last week.", icon: "🗓", xp: 50, area: "mental" },
-  ],
-  creative: [
-    { id: "c_read",     label: "Read 30 Pages",       desc: "Read 30 pages of a non-fiction book. Summarise 3 key insights after.", icon: "📚", xp: 45, area: "creative" },
-    { id: "c_learn",    label: "Learn Something New", desc: "Spend 45 minutes learning one skill you've never tried before.", icon: "💡", xp: 50, area: "creative" },
-    { id: "c_create",   label: "Create Something",    desc: "Make something with your hands or mind today — write, draw, build, code.", icon: "✍",  xp: 55, area: "creative" },
-    { id: "c_teach",    label: "Teach to Learn",      desc: "Explain something you've learned recently to someone else in full detail.", icon: "🎓", xp: 50, area: "creative" },
-    { id: "c_problem",  label: "Problem Solve",       desc: "Write out one real problem in your life and map 5 concrete solutions.", icon: "🔍", xp: 50, area: "creative" },
-    { id: "c_review",   label: "Skill Audit",         desc: "List your top 5 skills and rate yourself 1-10 on each. Plan to improve weakest.", icon: "📊", xp: 45, area: "creative" },
-  ],
-};
-
-const ALL_SKILLS = Object.values(SKILL_POOL).flat();
-
-// ════════════════════════════════════════════════════════
 //  BOSS CHALLENGE POOL — real life, all types, scales with level
 // ════════════════════════════════════════════════════════
 const BOSS_POOL = {
