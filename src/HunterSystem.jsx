@@ -109,8 +109,207 @@ const TASKS_DEF = [
   { id: "study",    label: "Study 1H",    xp: 40, icon: "📖", timer: 3600 },
   { id: "deepwork", label: "Deep Work 2H",xp: 60, icon: "🧠", timer: 7200 },
   { id: "workout",  label: "Workout",      xp: 35, icon: "💪", timer: null  },
-  { id: "social",   label: "Social Skill", xp: 30, icon: "🗣", timer: null  },
+  { id: "skill",    label: "Skill Quest",  xp: 45, icon: "🎯", timer: null, dynamic: true },
 ];
+
+// ════════════════════════════════════════════════════════
+//  SKILL POOL — all 4 life areas, AI rotates based on mastery
+// ════════════════════════════════════════════════════════
+const SKILL_POOL = {
+  communication: [
+    { id: "s_eye",      label: "Eye Contact",         desc: "Maintain steady eye contact in every conversation today. No looking away first.", icon: "👁",  xp: 45, area: "communication" },
+    { id: "s_listen",   label: "Active Listening",    desc: "In every conversation today, listen fully before speaking. No interrupting.", icon: "👂", xp: 45, area: "communication" },
+    { id: "s_voice",    label: "Voice Projection",    desc: "Speak louder and clearer than usual. Record yourself for 2 minutes and review.", icon: "🎙", xp: 45, area: "communication" },
+    { id: "s_story",    label: "Storytelling",        desc: "Tell one engaging story today to someone — real event, made compelling.", icon: "📢", xp: 50, area: "communication" },
+    { id: "s_debate",   label: "Argue a Position",    desc: "Pick any topic and argue both sides clearly in writing for 10 minutes.", icon: "⚖",  xp: 50, area: "communication" },
+    { id: "s_cold",     label: "Cold Conversation",   desc: "Start a genuine conversation with someone you've never spoken to before.", icon: "🤝", xp: 55, area: "communication" },
+  ],
+  physical: [
+    { id: "p_cold",     label: "Cold Shower",         desc: "End your shower with 2 full minutes of cold water. No easing in.", icon: "🧊", xp: 50, area: "physical" },
+    { id: "p_stretch",  label: "Mobility Work",       desc: "30 minutes of intentional stretching or yoga. Full range of motion.", icon: "🧘", xp: 40, area: "physical" },
+    { id: "p_posture",  label: "Posture Discipline",  desc: "Maintain perfect posture for the entire day. Set hourly reminders.", icon: "🏛",  xp: 40, area: "physical" },
+    { id: "p_breath",   label: "Breathwork",          desc: "10 minutes of box breathing (4-4-4-4). Track your focus before and after.", icon: "💨", xp: 45, area: "physical" },
+    { id: "p_fast",     label: "Intermittent Fast",   desc: "Skip breakfast. Eat only within a 6-hour window today.", icon: "⚡", xp: 50, area: "physical" },
+    { id: "p_sleep",    label: "Sleep Discipline",    desc: "In bed by 10 PM, no phone 1 hour before. Track your sleep quality.", icon: "🌙", xp: 45, area: "physical" },
+  ],
+  mental: [
+    { id: "m_nophone",  label: "No Phone 2H",         desc: "Zero phone usage for 2 consecutive hours. No cheating, no glances.", icon: "📵", xp: 55, area: "mental" },
+    { id: "m_journal",  label: "Reflection Journal",  desc: "Write 1 page about what you're avoiding and why. Be brutally honest.", icon: "📓", xp: 45, area: "mental" },
+    { id: "m_meditate", label: "Meditation",          desc: "20 minutes of silent meditation. When you lose focus, return without judgment.", icon: "🧠", xp: 45, area: "mental" },
+    { id: "m_hard",     label: "Do The Hard Thing",   desc: "Identify the ONE task you've been avoiding most. Do it today. No excuses.", icon: "🔥", xp: 60, area: "mental" },
+    { id: "m_gratitude",label: "Gratitude Practice",  desc: "Write 10 specific things you're grateful for. Not generic — be precise.", icon: "🙏", xp: 40, area: "mental" },
+    { id: "m_plan",     label: "Week Planning",       desc: "Write out your full week with time blocks. Review what worked last week.", icon: "🗓", xp: 50, area: "mental" },
+  ],
+  creative: [
+    { id: "c_read",     label: "Read 30 Pages",       desc: "Read 30 pages of a non-fiction book. Summarise 3 key insights after.", icon: "📚", xp: 45, area: "creative" },
+    { id: "c_learn",    label: "Learn Something New", desc: "Spend 45 minutes learning one skill you've never tried before.", icon: "💡", xp: 50, area: "creative" },
+    { id: "c_create",   label: "Create Something",    desc: "Make something with your hands or mind today — write, draw, build, code.", icon: "✍",  xp: 55, area: "creative" },
+    { id: "c_teach",    label: "Teach to Learn",      desc: "Explain something you've learned recently to someone else in full detail.", icon: "🎓", xp: 50, area: "creative" },
+    { id: "c_problem",  label: "Problem Solve",       desc: "Write out one real problem in your life and map 5 concrete solutions.", icon: "🔍", xp: 50, area: "creative" },
+    { id: "c_review",   label: "Skill Audit",         desc: "List your top 5 skills and rate yourself 1-10 on each. Plan to improve weakest.", icon: "📊", xp: 45, area: "creative" },
+  ],
+};
+
+const ALL_SKILLS = Object.values(SKILL_POOL).flat();
+
+// ════════════════════════════════════════════════════════
+//  BOSS CHALLENGE POOL — real life, all types, scales with level
+// ════════════════════════════════════════════════════════
+const BOSS_POOL = {
+  E: [
+    { id:"b_e1", title:"The Silence Gate",       desc:"No social media, no streaming, no entertainment for 24 full hours. Sit with your own thoughts.", reward:150, duration:"24 hours",  type:"Mental",   icon:"🧠" },
+    { id:"b_e2", title:"The First Step",          desc:"Pick a goal you've had for 6+ months and haven't started. Take the FIRST real concrete action today.", reward:150, duration:"Today",     type:"Mental",   icon:"🎯" },
+    { id:"b_e3", title:"The Body Awakens",        desc:"100 push-ups + 100 squats + 5km walk. Spread across the day. No excuses.", reward:150, duration:"1 day",     type:"Physical", icon:"💪" },
+    { id:"b_e4", title:"The Kitchen Initiation",  desc:"Cook one complete meal entirely from scratch — no processed ingredients. Eat what you make.", reward:150, duration:"Today",     type:"Cooking",  icon:"🍳" },
+    { id:"b_e5", title:"The Jump Trial",          desc:"500 jump rope skips total today. Split however you want. Count every one.", reward:150, duration:"1 day",     type:"Calisthenics", icon:"🪢" },
+    { id:"b_e6", title:"The Terminal Gate",       desc:"Open a terminal. Complete the first 3 levels of OverTheWire: Bandit (levels 0-2). Screenshot proof.", reward:160, duration:"Today",     type:"Hacking",  icon:"💻" },
+  ],
+  D: [
+    { id:"b_d1", title:"The Uncomfortable Truth", desc:"Have the conversation you've been avoiding — with a friend, family, or yourself in 2 pages of honest writing.", reward:175, duration:"Today",     type:"Social",   icon:"🗣" },
+    { id:"b_d2", title:"The Focus Dungeon",       desc:"4 hours of deep work, zero distractions. Phone in another room. Door closed. Track your output.", reward:175, duration:"4 hours",   type:"Mental",   icon:"🧠" },
+    { id:"b_d3", title:"The Cold King",           desc:"7 consecutive days of cold showers. Every single day. Log each session.", reward:200, duration:"7 days",    type:"Physical", icon:"🧊" },
+    { id:"b_d4", title:"The Chef's Trial",        desc:"Plan and cook all 3 meals for one full day from scratch. No takeaway, no instant food.", reward:180, duration:"1 day",     type:"Cooking",  icon:"🍽" },
+    { id:"b_d5", title:"The Rope Warrior",        desc:"1000 jump rope skips in a single session. Rest as needed but finish the count.", reward:175, duration:"1 session", type:"Calisthenics", icon:"🪢" },
+    { id:"b_d6", title:"The Recon Mission",       desc:"Complete OverTheWire Bandit levels 0-10. Document every command you used and what it taught you.", reward:200, duration:"3 days",    type:"Hacking",  icon:"💻" },
+  ],
+  C: [
+    { id:"b_c1", title:"The Content Blackout",   desc:"72 hours — no social media, no YouTube, no Netflix. Read, train, cook, and build instead.", reward:220, duration:"3 days",    type:"Mental",   icon:"📵" },
+    { id:"b_c2", title:"The Social Sovereign",   desc:"Have genuine conversations with 5 new people across 5 days. Not just hi — real exchanges.", reward:220, duration:"5 days",    type:"Social",   icon:"🤝" },
+    { id:"b_c3", title:"The Iron Week",           desc:"Train every single day for 7 days. Different movements each day. Track every rep.", reward:250, duration:"7 days",    type:"Physical", icon:"⚡" },
+    { id:"b_c4", title:"The Flavor Study",        desc:"Cook one dish from a cuisine you've never tried before. Research it, source the ingredients, execute it.", reward:220, duration:"This week", type:"Cooking",  icon:"🌍" },
+    { id:"b_c5", title:"The Thousand Gates",      desc:"2000 jump rope skips in one session. No quitting. Build up to it across the week if needed.", reward:230, duration:"7 days",    type:"Calisthenics", icon:"🪢" },
+    { id:"b_c6", title:"The Privilege Escalation",desc:"Set up Kali Linux (VM or live USB). Run your first vulnerability scan on a test target. Document findings.", reward:250, duration:"5 days",    type:"Hacking",  icon:"🔓" },
+  ],
+  B: [
+    { id:"b_b1", title:"The Monk Protocol",      desc:"5 AM wake-up for 7 consecutive days. No snooze. First 2 hours belong to your most important goal.", reward:280, duration:"7 days",    type:"Mental",   icon:"🌅" },
+    { id:"b_b2", title:"The Skill Forge",        desc:"10 hours this week dedicated to one specific skill. Every session logged. No scattered effort.", reward:280, duration:"7 days",    type:"Creative", icon:"🔥" },
+    { id:"b_b3", title:"The Rejection Trials",   desc:"Get intentionally rejected 5 times this week. Ask big. Expect no. Grow from every one.", reward:300, duration:"7 days",    type:"Social",   icon:"⚔" },
+    { id:"b_b4", title:"The Peak Run",           desc:"Complete your longest run or hardest physical challenge to date. Track distance, time, heart rate.", reward:280, duration:"1 day",     type:"Physical", icon:"🏃" },
+    { id:"b_b5", title:"The Meal Prep Sovereign",desc:"Prep all your meals for the entire week in one session. Clean ingredients only. No junk food all week.", reward:280, duration:"7 days",    type:"Cooking",  icon:"🥗" },
+    { id:"b_b6", title:"The Jump Sovereign",     desc:"100 consecutive skips without stopping, then 50 double-unders (or 200 fast singles). Every day for 5 days.", reward:290, duration:"5 days",    type:"Calisthenics", icon:"🪢" },
+    { id:"b_b7", title:"The CTF Infiltrator",    desc:"Complete one beginner CTF challenge on HackTheBox or TryHackMe. Write a full writeup of your method.", reward:300, duration:"7 days",    type:"Hacking",  icon:"🚩" },
+  ],
+  A: [
+    { id:"b_a1", title:"The Shadow Month",       desc:"30 days straight: 5 AM wake, daily training, 20 min reading, zero junk food. Log every single day.", reward:400, duration:"30 days",   type:"All",      icon:"👁" },
+    { id:"b_a2", title:"The Creation Gate",      desc:"Build something real and publish it publicly this week — code, article, video, art. Ship it.", reward:350, duration:"7 days",    type:"Creative", icon:"🌑" },
+    { id:"b_a3", title:"The Deep Discomfort",    desc:"Execute the one thing you fear most in your life right now. Plan it Monday. Do it by Friday.", reward:400, duration:"5 days",    type:"Mental",   icon:"🔥" },
+    { id:"b_a4", title:"The Iron Chef Trial",    desc:"Cook 7 different healthy meals across 7 days — all new recipes, all nutritionally balanced. Log macros.", reward:380, duration:"7 days",    type:"Cooking",  icon:"👨‍🍳" },
+    { id:"b_a5", title:"The Calisthenics Ascent",desc:"Achieve: 20 clean pull-ups OR 50 consecutive push-ups OR 100 consecutive jump rope double-unders.", reward:400, duration:"This month", type:"Calisthenics", icon:"🏋" },
+    { id:"b_a6", title:"The Network Breach",     desc:"Complete a medium-difficulty box on HackTheBox solo. Write a full technical writeup. Post it.", reward:420, duration:"2 weeks",   type:"Hacking",  icon:"💀" },
+  ],
+  S: [
+    { id:"b_s1", title:"The Monarch's Trial",    desc:"Design your own 30-day total transformation protocol. Execute it completely. Document the result publicly.", reward:500, duration:"30 days",   type:"All",      icon:"👑" },
+    { id:"b_s2", title:"The Shadow Sovereign",   desc:"Mentor one person for 30 days in any of your skills. Their measurable growth is your victory condition.", reward:500, duration:"30 days",   type:"Social",   icon:"⚔" },
+    { id:"b_s3", title:"The Cyber Monarch",      desc:"Pass the eJPT or CompTIA Security+ certification exam. No shortcuts. Real knowledge, real credential.", reward:600, duration:"60 days",   type:"Hacking",  icon:"🔱" },
+  ],
+};
+
+function getBossesForRank(rank) {
+  const ranks = ["E","D","C","B","A","S"];
+  const idx = ranks.indexOf(rank);
+  const current = BOSS_POOL[rank] || BOSS_POOL.E;
+  const lower = idx > 0 ? (BOSS_POOL[ranks[idx-1]] || []).slice(0,2) : [];
+  return [...current, ...lower];
+}
+
+// ════════════════════════════════════════════════════════
+//  SKILL POOL — 7 areas, AI rotates based on mastery gaps
+// ════════════════════════════════════════════════════════
+const SKILL_POOL = {
+  communication: [
+    { id:"s_eye",    label:"Eye Contact",        desc:"Maintain steady eye contact in every conversation today. Don't look away first.", icon:"👁",  xp:45, area:"communication" },
+    { id:"s_listen", label:"Active Listening",   desc:"Listen fully before speaking in every conversation. Zero interruptions.", icon:"👂", xp:45, area:"communication" },
+    { id:"s_voice",  label:"Voice Projection",   desc:"Speak louder and clearer than usual. Record 2 minutes of yourself and review.", icon:"🎙", xp:45, area:"communication" },
+    { id:"s_story",  label:"Storytelling",       desc:"Tell one compelling story to someone today — real event, made engaging.", icon:"📢", xp:50, area:"communication" },
+    { id:"s_debate", label:"Argue Both Sides",   desc:"Pick any topic. Write a clear argument FOR it and AGAINST it. 10 minutes each.", icon:"⚖",  xp:50, area:"communication" },
+    { id:"s_cold",   label:"Cold Conversation",  desc:"Start a genuine conversation with someone you have never spoken to before.", icon:"🤝", xp:55, area:"communication" },
+  ],
+  physical: [
+    { id:"p_cold",    label:"Cold Shower",        desc:"End your shower with 2 full minutes of cold water. No easing in. No shortcuts.", icon:"🧊", xp:50, area:"physical" },
+    { id:"p_stretch", label:"Mobility Work",      desc:"30 minutes of intentional stretching or yoga. Full range of motion focus.", icon:"🧘", xp:40, area:"physical" },
+    { id:"p_posture", label:"Posture Discipline", desc:"Perfect posture for the entire day. Set an hourly reminder to check.", icon:"🏛",  xp:40, area:"physical" },
+    { id:"p_breath",  label:"Breathwork",         desc:"10 minutes of box breathing (4-4-4-4). Log your focus level before and after.", icon:"💨", xp:45, area:"physical" },
+    { id:"p_fast",    label:"Intermittent Fast",  desc:"Skip breakfast. Eat only within a 6-hour window today. Track energy levels.", icon:"⚡", xp:50, area:"physical" },
+    { id:"p_sleep",   label:"Sleep Discipline",   desc:"In bed by 10 PM, phone off 1 hour before. Note sleep quality next morning.", icon:"🌙", xp:45, area:"physical" },
+  ],
+  mental: [
+    { id:"m_nophone",   label:"No Phone 2H",        desc:"Zero phone use for 2 consecutive hours. No glances, no checks. Total blackout.", icon:"📵", xp:55, area:"mental" },
+    { id:"m_journal",   label:"Reflection Journal", desc:"Write 1 page about what you're currently avoiding and exactly why. Be brutal.", icon:"📓", xp:45, area:"mental" },
+    { id:"m_meditate",  label:"Meditation 20min",   desc:"20 minutes of silent meditation. When focus breaks, calmly return. No app.", icon:"🧠", xp:45, area:"mental" },
+    { id:"m_hard",      label:"Do The Hard Thing",  desc:"Name the one task you've been avoiding most. Do it today. No rescheduling.", icon:"🔥", xp:60, area:"mental" },
+    { id:"m_gratitude", label:"Gratitude Practice", desc:"Write 10 specific things you're grateful for. Not generic — be precise each one.", icon:"🙏", xp:40, area:"mental" },
+    { id:"m_plan",      label:"Weekly Planning",    desc:"Block out your full week with time slots. Review what worked and failed last week.", icon:"🗓", xp:50, area:"mental" },
+  ],
+  creative: [
+    { id:"c_read",    label:"Read 30 Pages",      desc:"30 pages of a non-fiction book. Summarise 3 key insights you'll actually apply.", icon:"📚", xp:45, area:"creative" },
+    { id:"c_learn",   label:"Learn Something New",desc:"45 minutes on one skill you have never tried before. Document what you learned.", icon:"💡", xp:50, area:"creative" },
+    { id:"c_create",  label:"Create Something",   desc:"Make something today — write, draw, build, code. It doesn't have to be perfect.", icon:"✍",  xp:55, area:"creative" },
+    { id:"c_teach",   label:"Teach to Learn",     desc:"Explain something you've recently learned to another person in full detail.", icon:"🎓", xp:50, area:"creative" },
+    { id:"c_problem", label:"Problem Mapping",    desc:"Write one real problem in your life. Map 5 concrete, actionable solutions.", icon:"🔍", xp:50, area:"creative" },
+    { id:"c_audit",   label:"Skill Audit",        desc:"List your top 5 skills. Rate yourself 1-10 on each. Write a plan for the weakest.", icon:"📊", xp:45, area:"creative" },
+  ],
+  cooking: [
+    { id:"ck_boil",   label:"Master Boiling",       desc:"Cook a perfect soft-boiled (6 min) and hard-boiled egg. Understand timing by feel.", icon:"🥚", xp:40, area:"cooking" },
+    { id:"ck_sauce",  label:"Build a Sauce",         desc:"Make any sauce from scratch — no jar, no packet. Taste and adjust seasoning yourself.", icon:"🫕", xp:45, area:"cooking" },
+    { id:"ck_knife",  label:"Knife Skills",          desc:"Spend 20 minutes practising your knife technique. Fine dice an onion cleanly.", icon:"🔪", xp:45, area:"cooking" },
+    { id:"ck_meal",   label:"Full Balanced Meal",    desc:"Cook a complete meal with protein, carbs and vegetables — all from raw ingredients.", icon:"🍽", xp:50, area:"cooking" },
+    { id:"ck_new",    label:"New Cuisine",           desc:"Cook a recipe from a cuisine you've never made before. Research the technique properly.", icon:"🌍", xp:55, area:"cooking" },
+    { id:"ck_macro",  label:"Macro-Tracked Meal",    desc:"Cook a meal and calculate its macros (protein/carbs/fat) manually. Hit your targets.", icon:"📊", xp:50, area:"cooking" },
+  ],
+  calisthenics: [
+    { id:"jr_basics",  label:"Jump Rope 5min",     desc:"5 continuous minutes of jump rope without stopping. Maintain rhythm throughout.", icon:"🪢", xp:40, area:"calisthenics" },
+    { id:"jr_500",     label:"500 Skips",          desc:"Complete 500 total jump rope skips today. Split across sets if needed.", icon:"🪢", xp:45, area:"calisthenics" },
+    { id:"ca_push",    label:"Push-Up Ladder",     desc:"1-2-3-4-5-4-3-2-1 push-up ladder. Rest only between sets. Full range of motion.", icon:"💪", xp:45, area:"calisthenics" },
+    { id:"ca_squat",   label:"100 Squats",         desc:"100 bodyweight squats today. Break into sets. Full depth, no half-reps.", icon:"🦵", xp:45, area:"calisthenics" },
+    { id:"ca_hollow",  label:"Core Holds",         desc:"3 sets of hollow body hold — as long as you can. Then 3 sets of plank. Log times.", icon:"🔩", xp:50, area:"calisthenics" },
+    { id:"jr_double",  label:"Double-Unders",      desc:"Learn and complete 10 consecutive double-unders. Practise until you land them clean.", icon:"⚡", xp:60, area:"calisthenics" },
+    { id:"ca_pull",    label:"Pull-Up Practice",   desc:"Max pull-ups in 3 sets, 2 min rest between. Track reps. If no bar: do 50 rows.", icon:"🏋", xp:55, area:"calisthenics" },
+  ],
+  hacking: [
+    { id:"hk_terminal",label:"Terminal Fluency",    desc:"Open a terminal. Run 10 commands you've never used before. Document what each does.", icon:"💻", xp:45, area:"hacking" },
+    { id:"hk_net",     label:"Network Recon",       desc:"Use nmap to scan your own home network. Identify every device. Understand the output.", icon:"🌐", xp:50, area:"hacking" },
+    { id:"hk_bandit",  label:"Bandit Level",        desc:"Complete one level of OverTheWire: Bandit (start at your current level). Document method.", icon:"🔐", xp:55, area:"hacking" },
+    { id:"hk_python",  label:"Scripting Practice",  desc:"Write a Python script that automates something useful — file renaming, ping sweep, etc.", icon:"🐍", xp:55, area:"hacking" },
+    { id:"hk_ctf",     label:"CTF Challenge",       desc:"Complete one challenge on picoCTF or HackTheBox Starting Point. Write what you learned.", icon:"🚩", xp:65, area:"hacking" },
+    { id:"hk_vuln",    label:"Vuln Research",       desc:"Read one CVE in full. Understand the attack vector, impact, and patch. Summarise it.", icon:"🔍", xp:50, area:"hacking" },
+    { id:"hk_enum",    label:"Enumeration Drill",   desc:"Set up a local vulnerable VM (VulnHub) and run a full enumeration. List all findings.", icon:"🛡", xp:60, area:"hacking" },
+  ],
+};
+
+const ALL_SKILLS = Object.values(SKILL_POOL).flat();
+
+const AREA_META = {
+  communication: { icon:"💬", color:"#00f7ff" },
+  physical:      { icon:"💪", color:"#ff4d6d" },
+  mental:        { icon:"🧠", color:"#a259ff" },
+  creative:      { icon:"✍",  color:"#ffe600" },
+  cooking:       { icon:"🍳", color:"#ff9c00" },
+  calisthenics:  { icon:"🪢", color:"#00ff9c" },
+  hacking:       { icon:"💻", color:"#00cfff" },
+};
+
+// AI-style rotation: picks weakest area, least-done skill, avoids today's repeat
+function getNextSkill(skillLog) {
+  const areas = Object.keys(SKILL_POOL);
+  const todayK = todayKey();
+
+  // Score each area by average completions (lower = needs more work)
+  const areaScores = areas.map(area => {
+    const skills = SKILL_POOL[area];
+    const avg = skills.reduce((s, sk) => s + (skillLog[sk.id]?.completions || 0), 0) / skills.length;
+    return { area, avg };
+  }).sort((a, b) => a.avg - b.avg);
+
+  // Try areas from weakest first, find a valid skill
+  for (const { area } of areaScores) {
+    const candidates = SKILL_POOL[area]
+      .filter(s => skillLog[s.id]?.lastDoneDay !== todayK)
+      .sort((a, b) => (skillLog[a.id]?.completions || 0) - (skillLog[b.id]?.completions || 0));
+    if (candidates.length > 0) return candidates[0];
+  }
+  // Fallback: return any skill from weakest area
+  return SKILL_POOL[areaScores[0].area][0];
+}
 
 const PENALTY_TIERS = [
   { missed: 1, label: "MILD PUNISHMENT",   hpLoss: 10, xpLoss: 20,  streakReset: false, color: "#ff9c00", icon: "⚠",  msg: "One quest ignored. The shadow stirs within you." },
@@ -175,6 +374,9 @@ const DEFAULT_SYS = {
   claimedRewards: [],
   penaltyLog: [],
   activityLog: {},
+  skillLog: {},        // { skillId: { completions, lastDoneDay, area } }
+  activeBoss: null,    // current boss challenge the user accepted
+  bossLog: [],         // completed boss history
   lastDayKey: todayKey(),
   lastActive: Date.now(),
 };
@@ -510,6 +712,10 @@ Hunter Stats:
 - Daily tasks done today: ${sys.dailyTasks}/4
 - Weekly tasks: ${sys.weeklyTasks}
 - Skills: ${Object.entries(sys.skills).filter(([,v])=>v).map(([k])=>k).join(", ") || "none"}
+- Active boss challenge: ${sys.activeBoss ? sys.activeBoss.title : "none"}
+- Bosses defeated: ${sys.bossLog?.length || 0}
+- Skill mastery by area: ${Object.keys(SKILL_POOL).map(a => { const t = SKILL_POOL[a].reduce((s,sk)=>s+(sys.skillLog?.[sk.id]?.completions||0),0); const max = SKILL_POOL[a].length*7; return `${AREA_META[a].icon}${a}:${t}/${max}`; }).join(", ")}
+- Current skill quest: ${(() => { const s = getNextSkill(sys.skillLog||{}); return `${s?.label} (${s?.area}, ${sys.skillLog?.[s?.id]?.completions||0}/7 mastery)`; })()}
 - Recent penalties: ${(penaltyLog||[]).slice(-3).map(p=>p.label).join(", ") || "none"}
 
 Respond in 3-5 sentences. Use the stats for specific, actionable, personalised advice. Keep the Solo Leveling aesthetic.`;
@@ -786,15 +992,28 @@ export default function HunterSystem() {
     notify(`✅ Claimed: ${r.title}`);
   };
 
-  const doTask = t => {
+  const doTask = (t, activeSkill = null) => {
     if (doneTasks[t.id]) { notify("Already completed today!"); return; }
     setHistory(h => [...h.slice(-19), JSON.stringify({ sys, boss })]);
-    let xp = t.xp;
+    let xp = activeSkill ? activeSkill.xp : t.xp;
     if (sys.skills.xpBoost) xp = Math.floor(xp * 1.3);
-    applyXP(xp, { weeklyTasks: sys.weeklyTasks + 1, streak: sys.streak + 1 });
+    const extra = { weeklyTasks: sys.weeklyTasks + 1, streak: sys.streak + 1 };
+    // Update skill log if this was a skill quest
+    if (t.dynamic && activeSkill) {
+      const prev = sys.skillLog?.[activeSkill.id] || { completions: 0 };
+      extra.skillLog = {
+        ...sys.skillLog,
+        [activeSkill.id]: {
+          completions: prev.completions + 1,
+          lastDoneDay: todayKey(),
+          area: activeSkill.area,
+        }
+      };
+    }
+    applyXP(xp, extra);
     setDoneTasks(prev => ({ ...prev, [t.id]: true }));
-    setSys(prev => ({ ...prev, dailyTasks: prev.dailyTasks + 1 }));
-    notify(`+${xp} XP ← ${t.label}`);
+    setSys(prev => ({ ...prev, dailyTasks: prev.dailyTasks + 1, ...(extra.skillLog ? { skillLog: extra.skillLog } : {}) }));
+    notify(`+${xp} XP ← ${activeSkill ? activeSkill.label : t.label}`);
     if (soundEnabled) playSound("quest");
   };
 
@@ -955,6 +1174,31 @@ export default function HunterSystem() {
                 <span style={{ color: "#a259ff", fontWeight: 600, fontSize: 11 }}>{sys.weeklyTasks} / {req}</span></div>
               <Bar val={sys.weeklyTasks} max={req} c1="#a259ff" c2="#ff6fcf" h={8} />
             </Panel>
+
+            {/* Skill mastery overview */}
+            <Panel title="SKILL MASTERY" icon="🎯" color="#c084fc" delay={0.1}>
+              <div style={{ fontSize: 9, color: "#2a1a3a", letterSpacing: 2, marginBottom: 12 }}>
+                WEAKEST AREA GETS ASSIGNED NEXT — ROTATES AUTOMATICALLY
+              </div>
+              {Object.keys(SKILL_POOL).map(area => {
+                const skills = SKILL_POOL[area];
+                const total = skills.reduce((s, sk) => s + (sys.skillLog?.[sk.id]?.completions || 0), 0);
+                const max = skills.length * 7;
+                const meta = AREA_META[area];
+                return (
+                  <div key={area} style={{ marginBottom: 10 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9, color: meta.color + "99", letterSpacing: 1, marginBottom: 3 }}>
+                      <span>{meta.icon} {area.toUpperCase()}</span>
+                      <span style={{ color: meta.color + "66" }}>{total}/{max}</span>
+                    </div>
+                    <Bar val={total} max={max} c1={meta.color} c2={meta.color + "aa"} h={5} />
+                  </div>
+                );
+              })}
+              <div style={{ fontSize: 9, color: "#2a1a3a", letterSpacing: 1, marginTop: 10, padding: "8px 10px", background: "rgba(192,132,252,.05)", border: "1px solid #c084fc18", borderRadius: 3 }}>
+                NEXT SKILL: {(() => { const s = getNextSkill(sys.skillLog||{}); const m = AREA_META[s?.area]; return `${m?.icon || ""} ${s?.icon} ${s?.label} — ${s?.area}`; })()}
+              </div>
+            </Panel>
           </>)}
 
           {/* ══════ QUESTS ══════ */}
@@ -964,33 +1208,61 @@ export default function HunterSystem() {
                 COMPLETE ALL QUESTS BEFORE MIDNIGHT.<br />
                 FAILURE TRIGGERS AUTOMATIC PUNISHMENT.
               </div>
-              {TASKS_DEF.map((t, i) => (
-                <div key={t.id}
-                  className={`task-card${doneTasks[t.id] ? " done" : urgentWarning ? " urgent" : ""}`}
-                  style={{ animationDelay: i * 0.06 + "s" }}>
-                  <div className="task-hdr">
-                    <span className="task-name" style={{ color: doneTasks[t.id] ? "#00ff9c" : "#00f7ff" }}>
-                      {doneTasks[t.id] ? "✅" : "○"} {t.icon} {t.label}
-                    </span>
-                    <span className="task-xp">
-                      +{sys.skills.xpBoost ? Math.floor(t.xp * 1.3) : t.xp} XP
-                      {sys.skills.xpBoost && <span style={{ color: "#00ff9c" }}> ⚡</span>}
-                    </span>
+              {TASKS_DEF.map((t, i) => {
+                // Dynamic skill slot — show current rotating skill
+                const isSkill = t.dynamic;
+                const activeSkill = isSkill ? getNextSkill(sys.skillLog || {}) : null;
+                const displayTask = isSkill ? { ...t, label: activeSkill?.label || t.label, icon: activeSkill?.icon || t.icon, xp: activeSkill?.xp || t.xp } : t;
+                const completions = isSkill ? (sys.skillLog?.[activeSkill?.id]?.completions || 0) : null;
+                const masteryGoal = 7;
+
+                return (
+                  <div key={t.id}
+                    className={`task-card${doneTasks[t.id] ? " done" : urgentWarning ? " urgent" : ""}`}
+                    style={{ animationDelay: i * 0.06 + "s", borderColor: isSkill ? "#c084fc22" : "" }}>
+                    <div className="task-hdr">
+                      <span className="task-name" style={{ color: doneTasks[t.id] ? "#00ff9c" : isSkill ? "#c084fc" : "#00f7ff" }}>
+                        {doneTasks[t.id] ? "✅" : "○"} {displayTask.icon} {displayTask.label}
+                      </span>
+                      <span className="task-xp">
+                        +{sys.skills.xpBoost ? Math.floor(displayTask.xp * 1.3) : displayTask.xp} XP
+                        {sys.skills.xpBoost && <span style={{ color: "#00ff9c" }}> ⚡</span>}
+                      </span>
+                    </div>
+
+                    {/* Skill quest extra info */}
+                    {isSkill && activeSkill && !doneTasks[t.id] && (
+                      <div style={{ margin: "10px 0 4px", padding: "10px 12px", background: `${AREA_META[activeSkill.area]?.color}0a`, border: `1px solid ${AREA_META[activeSkill.area]?.color}22`, borderRadius: 4 }}>
+                        <div style={{ fontSize: 9, color: AREA_META[activeSkill.area]?.color + "88", letterSpacing: 1, marginBottom: 5 }}>
+                          {AREA_META[activeSkill.area]?.icon} {activeSkill.area.toUpperCase()} SKILL — {completions}/{masteryGoal} MASTERY
+                        </div>
+                        <Bar val={completions} max={masteryGoal} c1={AREA_META[activeSkill.area]?.color} c2={AREA_META[activeSkill.area]?.color + "88"} h={4} />
+                        <div style={{ fontSize: 9, color: AREA_META[activeSkill.area]?.color + "66", marginTop: 8, lineHeight: 1.7, letterSpacing: .5 }}>
+                          {activeSkill.desc}
+                        </div>
+                        {completions >= masteryGoal && (
+                          <div style={{ fontSize: 9, color: "#00ff9c", marginTop: 6, letterSpacing: 1 }}>
+                            ✅ MASTERED — New skill unlocks after this completion
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {t.timer && !doneTasks[t.id] && (
+                      <CountdownTimer totalSeconds={t.timer} onComplete={() => doTask(t, activeSkill)} />
+                    )}
+                    {!doneTasks[t.id] ? (
+                      <div style={{ marginTop: t.timer ? 4 : 10 }}>
+                        <Btn onClick={() => doTask(t, activeSkill)} color={isSkill ? "#c084fc" : "#00ff9c"}>✓ MARK COMPLETE</Btn>
+                      </div>
+                    ) : (
+                      <div style={{ fontSize: 9, color: "#1a4a2a", letterSpacing: 2, marginTop: 8 }}>
+                        QUEST COMPLETE — XP BANKED
+                      </div>
+                    )}
                   </div>
-                  {t.timer && !doneTasks[t.id] && (
-                    <CountdownTimer totalSeconds={t.timer} onComplete={() => doTask(t)} />
-                  )}
-                  {!doneTasks[t.id] ? (
-                    <div style={{ marginTop: t.timer ? 4 : 10 }}>
-                      <Btn onClick={() => doTask(t)} color="#00ff9c">✓ MARK COMPLETE</Btn>
-                    </div>
-                  ) : (
-                    <div style={{ fontSize: 9, color: "#1a4a2a", letterSpacing: 2, marginTop: 8 }}>
-                      QUEST COMPLETE — XP BANKED
-                    </div>
-                  )}
-                </div>
-              ))}
+                );
+              })}
               <Bar val={doneCount} max={TASKS_DEF.length} c1="#00ff9c" c2="#00f7ff" h={7} />
               <div style={{ textAlign: "right", fontSize: 9, color: "#1a4a3a", marginTop: 4 }}>
                 {doneCount === TASKS_DEF.length ? "⚡ ALL QUESTS COMPLETE" : `${TASKS_DEF.length - doneCount} remaining before midnight`}
@@ -1000,35 +1272,89 @@ export default function HunterSystem() {
 
           {/* ══════ BATTLE ══════ */}
           {tab === "battle" && (<>
-            <Panel title="BOSS BATTLE" icon="💀" color="#ff0040">
-              <div style={{ textAlign: "center" }}>
-                <div className="boss-skull"
-                  style={{ animation: bossAnim ? "bossShake .4s ease" : "float 3s ease infinite" }}>💀</div>
-                <div style={{ fontSize: 9, color: "#1a0505", letterSpacing: 3, marginBottom: 6 }}>DUNGEON BOSS</div>
-                <div style={{ fontSize: 11, color: "#ff4d4d", letterSpacing: 2, marginBottom: 8 }}>
-                  {boss.hp} / {boss.maxHp} HP
+            {/* ACTIVE BOSS CHALLENGE */}
+            {sys.activeBoss ? (
+              <Panel title="ACTIVE BOSS CHALLENGE" icon="⚔" color="#ff0040">
+                <div style={{ textAlign: "center", marginBottom: 14 }}>
+                  <div style={{ fontSize: 36, marginBottom: 8, filter: "drop-shadow(0 0 16px #ff004066)", animation: "float 3s ease infinite" }}>
+                    {sys.activeBoss.type === "Physical" ? "💪" : sys.activeBoss.type === "Mental" ? "🧠" : sys.activeBoss.type === "Social" ? "🤝" : "👁"}
+                  </div>
+                  <div style={{ fontFamily: "'Cinzel',serif", fontSize: 14, color: "#ff0040", letterSpacing: 3, textShadow: "0 0 16px #ff0040", marginBottom: 6 }}>
+                    {sys.activeBoss.title}
+                  </div>
+                  <div style={{ display: "inline-block", padding: "3px 12px", borderRadius: 2, border: "1px solid #ff004033", fontSize: 8, color: "#5a1a1a", letterSpacing: 2, marginBottom: 12 }}>
+                    {sys.activeBoss.type} · {sys.activeBoss.duration}
+                  </div>
                 </div>
-                <Bar val={boss.hp} max={boss.maxHp} c1="#ff0040" c2="#ff4d4d" h={10} />
-                <div style={{ marginTop: 14 }}><Btn onClick={attackBoss} color="#ff0040">⚔ ATTACK BOSS</Btn></div>
-                <div style={{ fontSize: 9, color: "#1a0505", marginTop: 8, letterSpacing: 2 }}>
-                  DMG: {sys.perks?.bossBoost ? Math.floor((20 + sys.level * 3) * 1.5) : 20 + sys.level * 3}/hit
-                  {sys.perks?.bossBoost && <span style={{ color: "#ff6600" }}> [MONARCH'S EYE]</span>}
+                <div style={{ background: "rgba(255,0,40,.04)", border: "1px solid #ff004022", borderRadius: 4, padding: "12px 14px", marginBottom: 14, fontSize: 10, color: "#6a2a2a", lineHeight: 1.9, letterSpacing: .5 }}>
+                  {sys.activeBoss.desc}
                 </div>
-              </div>
-            </Panel>
-            <Panel title="BOSS CHALLENGE" icon="🔥" color="#ff9c00" delay={0.06}>
-              <div style={{ fontSize: 9, color: "#2a1a00", letterSpacing: 2, marginBottom: 10, lineHeight: 1.7 }}>
-                COMPLETE ALL 4 DAILY QUESTS TO UNLOCK THE BOSS CHALLENGE
-              </div>
-              <Bar val={doneCount} max={4} c1="#ff9c00" c2="#ffee00" h={8} />
-              <div style={{ fontSize: 9, color: "#2a1a00", textAlign: "right", marginTop: 4 }}>{doneCount}/4</div>
-              <div style={{ marginTop: 10 }}>
-                <Btn onClick={() => {
-                  if (doneCount >= 4) { applyXP(150); notify("🔥 Boss Challenge CLEARED! +150 XP"); }
-                  else notify(`Need ${4 - doneCount} more daily quests`);
-                }} color="#ff9c00" disabled={doneCount < 4}>⚡ ATTEMPT</Btn>
-              </div>
-            </Panel>
+                <div style={{ fontSize: 9, color: "#3a1a1a", letterSpacing: 2, marginBottom: 10 }}>
+                  REWARD ON COMPLETION: +{sys.activeBoss.reward} XP
+                </div>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  <Btn onClick={() => {
+                    const reward = sys.activeBoss.reward;
+                    const title = sys.activeBoss.title;
+                    setSys(prev => ({
+                      ...prev,
+                      activeBoss: null,
+                      bossLog: [...(prev.bossLog||[]), { ...prev.activeBoss, completedAt: new Date().toLocaleDateString() }],
+                    }));
+                    applyXP(reward);
+                    notify(`🏆 BOSS DEFEATED: ${title} — +${reward} XP`);
+                    if (soundEnabled) playSound("levelup");
+                  }} color="#00ff9c">🏆 BOSS DEFEATED — CLAIM REWARD</Btn>
+                  <Btn onClick={() => {
+                    setSys(prev => ({ ...prev, activeBoss: null }));
+                    notify("Boss challenge abandoned.");
+                  }} color="#ff0040" small>✗ ABANDON</Btn>
+                </div>
+              </Panel>
+            ) : (
+              <Panel title="BOSS CHAMBER" icon="💀" color="#ff0040">
+                <div style={{ fontSize: 9, color: "#2a0a0a", letterSpacing: 2, marginBottom: 14, lineHeight: 1.8 }}>
+                  THESE ARE REAL-LIFE CHALLENGES SCALED TO YOUR RANK.<br />
+                  ACCEPT ONE. COMPLETE IT. CLAIM YOUR REWARD.
+                </div>
+                {getBossesForRank(sys.rank, sys.level).map(b => (
+                  <div key={b.id} style={{
+                    background: "rgba(255,0,40,.03)", border: "1px solid #ff004022",
+                    borderRadius: 5, padding: 14, marginBottom: 10,
+                    transition: "all .2s",
+                  }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+                      <div style={{ fontFamily: "'Cinzel',serif", fontSize: 11, color: "#ff4d4d", letterSpacing: 2 }}>{b.title}</div>
+                      <div style={{ fontSize: 8, color: "#3a1a1a", letterSpacing: 1, textAlign: "right", flexShrink: 0, marginLeft: 8 }}>
+                        <div style={{ color: "#ff6600" }}>+{b.reward} XP</div>
+                        <div style={{ marginTop: 2 }}>{b.type}</div>
+                        <div>{b.duration}</div>
+                      </div>
+                    </div>
+                    <div style={{ fontSize: 9, color: "#4a2a2a", lineHeight: 1.8, letterSpacing: .5, marginBottom: 10 }}>
+                      {b.desc}
+                    </div>
+                    <Btn onClick={() => {
+                      setSys(prev => ({ ...prev, activeBoss: { ...b, acceptedAt: new Date().toLocaleDateString() } }));
+                      notify(`⚔ Boss accepted: ${b.title}`);
+                      if (soundEnabled) playSound("boss");
+                    }} color="#ff0040" small>⚔ ACCEPT CHALLENGE</Btn>
+                  </div>
+                ))}
+              </Panel>
+            )}
+
+            {/* Boss history */}
+            {sys.bossLog?.length > 0 && (
+              <Panel title="DEFEATED BOSSES" icon="🏆" color="#ff6600" delay={0.06}>
+                {[...(sys.bossLog||[])].reverse().slice(0,5).map((b, i) => (
+                  <div key={i} style={{ padding: "8px 0", borderBottom: "1px solid #ff004011", fontSize: 9, color: "#4a2a00", letterSpacing: 1 }}>
+                    <span style={{ color: "#ff6600" }}>{b.title}</span> — {b.completedAt} · +{b.reward} XP
+                  </div>
+                ))}
+              </Panel>
+            )}
+
             <Panel title="WEEKLY RAID" icon="🛡" color="#a259ff" delay={0.1}>
               <Bar val={sys.weeklyTasks} max={req} c1="#a259ff" c2="#ff6fcf" h={8} />
               <div style={{ fontSize: 9, color: "#1a1a3a", textAlign: "right", marginTop: 4 }}>{sys.weeklyTasks}/{req}</div>
